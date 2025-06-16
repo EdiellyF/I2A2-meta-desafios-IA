@@ -5,27 +5,23 @@ Este projeto implementa um agente autônomo para análise de notas fiscais usand
 ## Estrutura do Projeto
 
 ```
-├── app.py                       # Ponto de entrada da aplicação
-├── services/
-│   └── file_service.py          # Funções para upload, extração e listagem de arquivos do ZIP
-└── agent_core/
-    ├── agent.py                 # Lógica do agente: processamento dos dados e integração com LLM
-    ├── ui.py                    # Interface do usuário (Streamlit)
-    ├── middlewares.py           # Middlewares (ex.: validação, cache)
-    └── utils.py                 # Funções auxiliares e utilitários
+.
+├── app.py                 # Interface Streamlit
+├── agent_core/           # Core do agente
+│   ├── __init__.py
+│   ├── agent.py          # Implementação do agente
+│   └── llm_factory.py    # Configuração do LLM
+├── requirements.txt      # Dependências
+└── README.md            # Este arquivo
 ```
 
 ## Funcionalidades
 
-
-- **Upload e Extração**: Permite o upload de um arquivo ZIP contendo os dados das notas fiscais, que é automaticamente extraído.
-- **Análise de Dados**: Identifica e processa arquivos CSV, XLSX e XLS para extrair informações como total de notas, valor total e média.
-- **Consulta Interativa**: Usuário faz perguntas sobre os dados e o agente responde utilizando um LLM.
-- **Middlewares**: Implementa middlewares para:
-- Validação de perguntas (garante que são suficientemente informativas).
-- Cache de resultados para otimizar execuções repetitivas.
-- Tratamento de erros.
-
+- Upload de arquivo ZIP contendo notas fiscais
+- Extração automática dos arquivos CSV
+- Análise de dados usando LangChain e Google Gemini
+- Interface amigável com Streamlit
+- Respostas em linguagem natural
 
 ## Requisitos
 
@@ -35,7 +31,13 @@ Este projeto implementa um agente autônomo para análise de notas fiscais usand
 
 ## Instalação
 
-1. Instale as dependências:
+1. Clone o repositório:
+```bash
+git clone [URL_DO_REPOSITÓRIO]
+cd [NOME_DO_DIRETÓRIO]
+```
+
+2. Instale as dependências:
 ```bash
 pip install -r requirements.txt
 ```
@@ -65,13 +67,31 @@ streamlit run app.py
 
 ## Tecnologias Utilizadas
 
-- Python 3.8+
-- [Streamlit](https://streamlit.io/)
-- [LangChain](https://python.langchain.com/)
-- [langchain_google_genai](https://github.com/google/langchain_google_genai)
-- [Pandas](https://pandas.pydata.org/)
-- Outras dependências listadas no `requirements.txt`
+- **LangChain**: Framework para construção de agentes de IA
+- **Google Gemini**: Modelo de linguagem para processamento de perguntas
+- **Streamlit**: Framework para interface web
+- **Pandas**: Biblioteca para manipulação de dados
+- **Python-dotenv**: Gerenciamento de variáveis de ambiente
 
+## Estrutura dos Dados
+
+O projeto espera um arquivo ZIP contendo dois arquivos CSV:
+
+1. `202401_NFs_Cabecalho.csv`: Contém informações do cabeçalho das notas fiscais
+   - CHAVE DE ACESSO
+   - MODELO
+   - SÉRIE
+   - NÚMERO
+   - VALOR NOTA FISCAL
+   - RAZÃO SOCIAL EMITENTE
+   - etc.
+
+2. `202401_NFs_Itens.csv`: Contém os itens das notas fiscais
+   - CHAVE DE ACESSO
+   - DESCRIÇÃO DO PRODUTO/SERVIÇO
+   - VALOR UNITÁRIO
+   - VALOR TOTAL
+   - etc.
 
 ## Contribuição
 
