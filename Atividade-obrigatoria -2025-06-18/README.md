@@ -33,8 +33,8 @@ Este projeto implementa um agente autônomo para análise de notas fiscais usand
 
 1. Clone o repositório:
 ```bash
-git clone [URL_DO_REPOSITÓRIO]
-cd [NOME_DO_DIRETÓRIO]
+git clone
+cd 
 ```
 
 2. Instale as dependências:
@@ -61,9 +61,14 @@ streamlit run app.py
 
 4. Faça suas perguntas, por exemplo:
    - "Qual é o valor total das notas fiscais?"
-   - "Liste os 5 serviços mais frequentes"
    - "Qual é a média de valor por nota fiscal?"
    - "Quais são os 3 fornecedores que mais emitiram notas?"
+   - "Quais são as naturezas de operação mais comuns?"
+   - "Quais são os 5 fornecedores que mais emitiram notas em valor?"
+   - "Quantas notas fiscais foram recebidas por cada UF destinatário?"
+   - "Liste todas as descrições de produtos/serviços e seus respectivos NCM."
+   - "Existem itens onde o valor total não bate com a multiplicação da quantidade pelo valor unitário?"
+   
 
 ## Tecnologias Utilizadas
 

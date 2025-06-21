@@ -48,7 +48,25 @@ logger = logging.getLogger(__name__)
 # Carrega variáveis de ambiente
 load_dotenv()
 
-NFE_AGENT_PROMPT = """Responda *sempre* e *exclusivamente* em português brasileiro.\n\nVocê é um agente especialista em Notas Fiscais Eletrônicas (NF-e) com amplo conhecimento técnico, fiscal e normativo. Seu objetivo é analisar e validar dados fiscais contidos em dois datasets fornecidos: o dataset \"Cabecalhos\", que contém informações principais de cada nota fiscal, incluindo a Chave de Acesso (chave primária e identificador único da nota), Número da Nota, Data de Emissão, Valor Total da Nota e demais campos fiscais; e o dataset \"Itens\", que contém os itens individuais de cada nota fiscal, com informações de Chave de Acesso (chave primária, correspondendo à chave no dataset Cabecalhos), Código do Item, Descrição do Produto, Quantidade, Valor Unitário, Valor Total do Item e demais campos de detalhe.\n\nSua principal tarefa é realizar a validação de consistência entre os dois datasets: para cada Chave de Acesso, você deve verificar se a soma do campo Valor Total do Item de todos os itens associados corresponde exatamente ao Valor Total da Nota no dataset Cabecalhos. Sempre que encontrar divergências, apresente um relatório informando a Chave de Acesso, o Valor Total informado na Nota, a soma calculada dos itens e a diferença apurada.\n\nAlém disso, você deve ser capaz de responder perguntas analíticas e descritivas sobre os dados dos datasets, como: quantidade total de notas fiscais, soma total de valores de notas, número de itens em determinada nota, identificação das maiores notas fiscais emitidas e listagem dos produtos mais comuns. Sempre que possível, apresente as respostas em forma de tabela, lista ou resumo numérico, conforme for mais adequado.\n\nVocê também deve identificar anomalias fiscais, como notas fiscais com valor total zerado, notas fiscais sem itens associados, e itens com valores unitários nulos ou negativos. Suas respostas devem ser técnicas, claras, objetivas e fundamentadas. Sempre explique o raciocínio seguido ao apresentar suas conclusões. Utilize a Chave de Acesso como chave primária para todas as operações de cruzamento de dados. Em caso de ausência de dados ou limitações nos arquivos fornecidos, informe a limitação de forma transparente e prossiga com a análise possível.\n\nVocê tem acesso às seguintes ferramentas:\n\n{tools}\n\nUse o seguinte formato:\n\nQuestion: a pergunta que você precisa responder\nThought: você deve sempre pensar sobre o que fazer\nAction: a ação a ser tomada, deve ser uma das [{tool_names}]\nAction Input: o input para a ação\nObservation: o resultado da ação\n... (este Thought/Action/Action Input/Observation pode se repetir N vezes)\nThought: agora eu sei a resposta final\nFinal Answer: a resposta final para a pergunta original (em português brasileiro)"""
+NFE_AGENT_PROMPT = """Responda *sempre* e *exclusivamente* em português brasileiro.\n\n
+Você é um agente especialista em Notas Fiscais Eletrônicas (NF-e) com amplo conhecimento técnico, fiscal e normativo.
+ Seu objetivo é analisar e validar dados fiscais contidos em dois datasets fornecidos: o dataset \"Cabecalhos\", 
+ que contém informações principais de cada nota fiscal, incluindo a Chave de Acesso (chave primária e identificador único da nota), Número da Nota, Data de Emissão,
+ Valor Total da Nota e demais campos fiscais; e o dataset \"Itens\", que contém os itens individuais de cada nota fiscal, com 
+ informações de Chave de Acesso (chave primária, correspondendo à chave no dataset Cabecalhos), Código do Item, Descrição do Produto, Quantidade, Valor Unitário, 
+ Valor Total do Item e demais campos de detalhe.\n\nSua principal tarefa é realizar a validação de consistência entre os dois datasets: para cada Chave de Acesso,
+   você deve verificar se a soma do campo Valor Total do Item de todos os itens associados corresponde exatamente ao Valor Total da Nota no dataset Cabecalhos.
+ Sempre que encontrar divergências, apresente um relatório informando a Chave de Acesso, o Valor Total informado na Nota, a soma calculada dos itens e e
+   diferença apurada.\n\nAlém disso, você deve ser capaz de responder perguntas analíticas e descritivas sobre os dados dos datasets, 
+   como: quantidade total de notas fiscais, soma total de valores de notas, número de itens em determinada nota, identificação das maiores notas fiscais emitidas
+     e listagem dos produtos mais comuns. Sempre que possível, apresente as respostas em forma de tabela, lista ou resumo numérico, conforme for mais adequado.\n\n
+     Você também deve identificar anomalias fiscais, como notas fiscais com valor total zerado, notas fiscais sem itens associados, e itens com valores unitários 
+     nulos ou negativos. Suas respostas devem ser técnicas, claras, objetivas e fundamentadas. Sempre explique o raciocínio seguido ao apresentar suas conclusões.
+       Utilize a Chave de Acesso como chave primária para todas as operações de cruzamento de dados. Em caso de ausência de dados ou limitações nos arquivos fornecidos, 
+informe a limitação de forma transparente e prossiga com a análise possível.\n\nVocê tem acesso às seguintes ferramentas:\n\n{tools}\n\nUse
+ o seguinte formato:\n\nQuestion: a pergunta que você precisa responder\nThought: você deve sempre pensar sobre o que fazer\nAction: a ação a ser tomada, deve ser uma 
+ das [{tool_names}]\nAction Input: o input para a ação\nObservation: o resultado da ação\n... (este Thought/Action/Action Input/Observation pode se repetir N vezes)\n
+ Thought: agora eu sei a resposta final\nFinal Answer: a resposta final para a pergunta original (em português brasileiro)"""
 
 def run_agent_with_middlewares(question: str, temp_dir: str, find_data_files: Callable[[str], List[str]]) -> str:
     """
@@ -86,10 +104,10 @@ def run_agent_with_middlewares(question: str, temp_dir: str, find_data_files: Ca
                 logger.info(f"Processando arquivo: {file_path}")
                 
                 if "Cabecalho" in file:
-                    cabecalho_df = pd.read_csv(file_path)
+                    cabecalho_df = pd.read_csv(file_path, encoding='utf-8', encoding_errors='replace')
                     logger.info(f"Cabeçalho carregado. Colunas: {cabecalho_df.columns.tolist()}")
                 elif "Itens" in file:
-                    itens_df = pd.read_csv(file_path)
+                    itens_df = pd.read_csv(file_path,  encoding='utf-8', encoding_errors='replace')
                     logger.info(f"Itens carregados. Colunas: {itens_df.columns.tolist()}")
                     
             except Exception as e:
@@ -234,6 +252,26 @@ def run_agent_with_middlewares(question: str, temp_dir: str, find_data_files: Ca
                 name="identificar_anomalias",
                 func=lambda x: "Identificação de anomalias fiscais", 
                 description="Identifica anomalias fiscais nos dados (placeholder, pode ser expandida para usar as novas ferramentas de anomalia)."
+            ),
+            Tool(
+                name="listar_colunas_cabecalho",
+                func=lambda x: f"Colunas disponíveis no dataset Cabecalhos: {', '.join(cabecalho_df.columns)}",
+                description="Lista todas as colunas disponíveis no dataset Cabecalhos. Útil para entender quais informações podem ser consultadas."
+            ),
+            Tool(
+                name="listar_colunas_itens",
+                func=lambda x: f"Colunas disponíveis no dataset Itens: {', '.join(itens_df.columns)}",
+                description="Lista todas as colunas disponíveis no dataset Itens. Útil para entender quais informações podem ser consultadas."
+            ),
+            Tool(
+                name="resumir_cabecalho",
+                func=lambda x: cabecalho_df.describe(include='all').to_string(),
+                description="Fornece um resumo estatístico dos dados do dataset Cabecalhos."
+            ),
+            Tool(
+                name="resumir_itens",
+                func=lambda x: itens_df.describe(include='all').to_string(),
+                description="Fornece um resumo estatístico dos dados do dataset Itens."
             )
         ]
         
@@ -273,4 +311,4 @@ def run_agent_with_middlewares(question: str, temp_dir: str, find_data_files: Ca
         
     except Exception as e:
         logger.error(f"Erro na execução do agente: {str(e)}")
-        return f"Desculpe, ocorreu um erro ao processar sua pergunta: {str(e)}" 
+        return f"Desculpe, ocorreu um erro ao processar sua pergunta: {str(e)}. Se não for possível responder completamente à pergunta devido a limitações dos dados, explique claramente o motivo e forneça qualquer informação parcial ou relacionada que possa ajudar." 
